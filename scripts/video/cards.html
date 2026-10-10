@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Kosh cards</title>
+    <style>
+      html, body { margin: 0; width: 1280px; height: 720px; background: #0a0a0a; color: #fafafa; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; overflow: hidden; }
+      section[hidden] { display: none !important; }
+      .card { position: relative; width: 1280px; height: 720px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 22px;
+        background: radial-gradient(ellipse 70% 55% at 50% 42%, rgba(34, 197, 94, 0.14), transparent 70%), #0a0a0a; }
+      .mark { width: 96px; height: 96px; }
+      h1 { font-size: 72px; font-weight: 600; letter-spacing: -0.03em; margin: 0; line-height: 1; }
+      .tag { font-size: 30px; color: #d4d4d8; margin: 0; font-weight: 400; letter-spacing: -0.01em; }
+      .tag b { color: #fafafa; font-weight: 600; }
+      .foot { position: absolute; bottom: 44px; left: 0; right: 0; font-size: 18px; color: #71717a; letter-spacing: 0.02em; }
+      .foot span + span::before { content: "·"; margin: 0 14px; color: #3f3f46; }
+      .eyebrow { font-size: 15px; letter-spacing: 0.22em; text-transform: uppercase; color: #22c55e; font-weight: 600; margin-bottom: -6px; }
+      .stack { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+      .line { font-size: 34px; color: #e4e4e7; }
+      .line.dim { color: #a1a1aa; }
+    </style>
+  </head>
+  <body>
+    <section class="card" id="title">
+      <svg class="mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="16" fill="#fafafa"/><path d="M23 18v28M23 33l16-15M25 33l16 13" stroke="#0a0a0a" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h1>Kosh</h1>
+      <p class="tag">A treasury agent that <b>can't break the rules</b></p>
+      <div class="foot"><span>AgntID Hackathon</span><span>Bengaluru</span><span>October 2026</span></div>
+    </section>
+    <section class="card" id="close" hidden>
+      <div class="eyebrow">Kosh</div>
+      <div class="stack">
+        <div class="line">Real paper orders on Alpaca.</div>
+        <div class="line">Real policy enforcement at runtime.</div>
+        <div class="line dim">Every tool call, checked before it runs.</div>
+      </div>
+      <div class="foot"><span>AgntID</span><span>Alpaca</span><span>OpenRouter</span><span>Supabase</span><span>Next.js</span></div>
+    </section>
+    <script>
+      const which = new URLSearchParams(location.search).get("card") || "title";
+      for (const el of document.querySelectorAll("section")) el.hidden = el.id !== which;
+    </script>
+  </body>
+</html>

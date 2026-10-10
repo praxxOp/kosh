@@ -1,0 +1,27 @@
+[
+  {
+    "id": "s1",
+    "title": "Kosh",
+    "text": "Companies sit on idle cash. Finance teams want to park it safely, and now they want an AI agent to do it. But an agent with a broker login is one bad prompt away from a very expensive mistake. This is Kosh."
+  },
+  {
+    "id": "s2",
+    "title": "Guarded run",
+    "text": "Kosh is an AI treasury agent for a mid-size company. It reads the books, finds the spare cash, and invests it. But every single tool call is checked against the board's treasury policy at runtime. Here the treasury manager asks Kosh to invest. It pulls the cash position, runs the recommendation pipeline, and places orders only in Treasury-bill ETFs, inside the limits the board set."
+  },
+  {
+    "id": "s3",
+    "title": "Guard off",
+    "text": "Switch the guard off, and the same agent becomes dangerous. It chases yield into crypto and leveraged ETFs, and when a fake CFO email asks for an urgent transfer, it simply pays. With the guard on, every one of those calls is blocked, and the audit log says exactly which rule stopped it."
+  },
+  {
+    "id": "s4",
+    "title": "Policy and approvals",
+    "text": "The policy is ten plain-English rules: safe instruments only, no leverage, order limits by role, money only to registered accounts. They are enforced by AgntID's runtime proxy, with Kosh's own policy engine as a fallback. Orders above an analyst's limit are not blocked. They are held, sent to the treasury manager or the CFO, and executed only once approved."
+  },
+  {
+    "id": "s5",
+    "title": "Close",
+    "text": "Real paper orders on Alpaca. Real policy enforcement at runtime. Kosh: a treasury agent that cannot break the rules. Built for the AgntID hackathon."
+  }
+]
