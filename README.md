@@ -52,6 +52,49 @@ Rules live in the Policy page as cards with chips and limits (no JSON for financ
 
 Three people share the app: Kavya (Finance Analyst), Arjun (Treasury Manager) and Priya (CFO). An analyst's order is never placed directly. It becomes a proposal, she sends it up, the manager (or the CFO, above 10,000 dollars) sees it under "Needs you now" and approves or rejects it. Approval re-runs the action through the same guard, as the approver. Each person has their own chat and inbox.
 
+## Architecture
+
+Kosh is one Next.js app, with a streaming agent loop on the server and four tool servers exposed over MCP. This is the guarded path implemented in the code:
+
+```mermaid
+flowchart TD
+    UI["Next.js dashboard<br/>Role selector, chat and action feed"]
+    API["POST /api/chat<br/>SSE event stream"]
+    Agent["Agent loop<br/>lib/kosh/agent.ts"]
+    LLM["OpenRouter<br/>Streaming tool calls"]
+    Gateway["Action gateway<br/>executeAction"]
+    Local["Local policy evaluator<br/>Rules R1-R10 + portfolio state"]
+    Hold["Approval proposal<br/>Submit to Manager or CFO"]
+    Proxy["AgntID MCP proxy<br/>Task + acting identity"]
+    MCP["MCP endpoints<br/>tally / alpaca / bank / kosh"]
+    Tools["Tool implementations<br/>Books, broker, bank, recommendations"]
+    Store["Store<br/>Rules + audit: Supabase or memory<br/>Approvals: memory"]
+    External["Alpaca paper API + market data<br/>Demo Tally books + demo bank"]
+
+    UI --> API --> Agent
+    Agent <--> LLM
+    Agent --> Gateway
+    Gateway --> Local
+    Local -->|needs approval| Hold
+    Hold -->|approved as approver| Gateway
+    Gateway -->|AgntID session available| Proxy
+    Proxy --> MCP --> Tools
+    Gateway -->|no AgntID session, locally allowed| Tools
+    Tools --> External
+    Gateway -->|every result| Store
+    Store -. rules .-> Local
+    Gateway -. action events .-> API
+    API -. text + actions .-> UI
+```
+
+- **The model proposes; the gateway acts.** `app/api/chat/route.ts` validates the request and streams `runAgent` events. The agent uses OpenRouter's OpenAI-compatible API, then sends each tool call to `executeAction` in `lib/kosh/gateway/index.ts`.
+- **Two enforcement paths.** With guardrails on, the local evaluator checks role, policy and any required portfolio state. It creates approval holds. When an AgntID session is available, the proxy makes the execution decision and calls the MCP endpoints; otherwise the local decision controls direct execution. A local block is recorded for context but does not override an AgntID allow.
+- **Approval is another guarded execution.** A held action starts as a draft proposal. Submission routes it to the Manager or CFO. Approval re-runs the action as the approver through the same gateway; rejection closes the proposal.
+- **Persistence matches the demo.** `lib/kosh/store.ts` stores rules and audit in Supabase when configured, with an in-memory fallback. Approvals stay in process memory even with Supabase enabled. Tally books and bank transfers are demo data; Alpaca places real paper orders, not live-money trades.
+- **Guardrails off is a separate demo path.** It skips policy checks and calls the tool implementation directly, while still recording the result in the audit store. It is intentionally not shown as a safe production path above.
+
+Source map: [`agent.ts`](lib/kosh/agent.ts), [`gateway`](lib/kosh/gateway/index.ts), [`AgntID session`](lib/kosh/gateway/agntid.ts), [`MCP handler`](lib/kosh/mcp-server.ts), [`tool registry`](lib/kosh/tools/registry.ts), [`approvals API`](app/api/approvals/route.ts) and [`store`](lib/kosh/store.ts).
+
 ## Runtime enforcement with AgntID
 
 Kosh exposes its four tool servers as MCP endpoints:
